@@ -1,3 +1,4 @@
+// models/clothingItem.js
 const { Schema, model, Types } = require('mongoose');
 const validator = require('validator');
 
@@ -13,15 +14,13 @@ const clothingItemSchema = new Schema(
     weather: {
       type: String,
       required: true,
-      enum: ['hot', 'warm', 'cold'], // debe coincidir con tu frontend
+      enum: ['hot', 'warm', 'cold'],
     },
     imageUrl: {
       type: String,
       required: true,
       validate: {
-        validator(value) {
-          return validator.isURL(value);
-        },
+        validator: (v) => validator.isURL(v),
         message: 'You must enter a valid URL',
       },
     },
@@ -30,13 +29,11 @@ const clothingItemSchema = new Schema(
       ref: 'User',
       required: true,
     },
-    likes: [
-      {
-        type: Types.ObjectId,
-        ref: 'User',
-        default: undefined, // array vacío por defecto (sin crear campo si no hay likes)
-      },
-    ],
+    // ✅ default en el path del array
+    likes: {
+      type: [{ type: Types.ObjectId, ref: 'User' }],
+      default: [],
+    },
     createdAt: {
       type: Date,
       default: Date.now,
