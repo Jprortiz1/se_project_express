@@ -1,12 +1,8 @@
-// Centraliza configuraciones que luego ocultarás del repo
+// utils/config.js
 const {
-  JWT_SECRET = 'super-strong-secret',
   PORT = 3001,
-  MONGODB_URI = 'mongodb://127.0.0.1:27017/wtwr_db',
+  MONGODB_URI = 'mongodb://localhost:27017/wtwr_db', // 👈 default requerido por los tests
+  JWT_SECRET = 'super-strong-secret',
 } = process.env;
 
-module.exports = {
-  JWT_SECRET,
-  PORT,
-  MONGODB_URI,
-};
+module.exports = { PORT, MONGODB_URI, JWT_SECRET };
