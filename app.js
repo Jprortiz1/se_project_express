@@ -1,35 +1,52 @@
-// app.js
+require('dotenv').config();
 const express = require('express');
 const mongoose = require('mongoose');
+const cors = require('cors');
+
 const routes = require('./routes');
+const { PORT, MONGODB_URI } = require('./utils/config');
 
 const app = express();
-const { PORT = 3001 } = process.env;
 
-mongoose
-  .connect('mongodb://127.0.0.1:27017/wtwr_db')
-  .then(() => console.log('✅ MongoDB connected'))
-  .catch((err) => {
-    console.error('❌ Error connecting to MongoDB:', err.message);
-    process.exit(1);
-  });
+// CORS
+app.use(
+  cors({
+    origin: [
+      'http://localhost:3000',
+      'http://localhost:5173',
+      // 'https://tu-frontend.com', // agrega tu frontend en prod si aplica
+    ],
+    credentials: true,
+  }),
+);
 
+// Parseo JSON
 app.use(express.json());
 
-// Temporary auth: inject a fixed test user until real auth is implemented
-app.use((req, res, next) => {
-  req.user = { _id: '68d99f2aafbfef8e526f0fbc' };
-  next();
-});
+// Conexión a Mongo
+mongoose.connect(MONGODB_URI, { autoIndex: true });
 
-// Mount routes before the 404 handler
+// (Opcional) Healthcheck sencillo
+app.get('/', (req, res) => res.send('API OK'));
+
+// Rutas
 app.use(routes);
 
-// 404
+// 404 para rutas no encontradas
 app.use((req, res) => {
-  res.status(404).send({ message: 'Requested resource not found' });
+  res.status(404).send({ message: 'Not found' });
 });
 
+// Manejador de errores genérico
+// eslint-disable-next-line no-unused-vars
+app.use((err, req, res, next) => {
+  // eslint-disable-next-line no-console
+  console.error(err);
+  res.status(500).send({ message: 'Internal server error' });
+});
+
+// Inicio del servidor
 app.listen(PORT, () => {
-  console.log(`Server listening at http://localhost:${PORT}`);
+  // eslint-disable-next-line no-console
+  console.log(`Server running on port ${PORT}`);
 });

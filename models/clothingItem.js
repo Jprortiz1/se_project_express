@@ -20,18 +20,18 @@ const clothingItemSchema = new Schema(
       type: String,
       required: true,
       validate: {
-        validator: (v) => validator.isURL(v),
-        message: 'You must enter a valid URL',
+        validator: (v) =>
+          validator.isURL(v, { protocols: ['http', 'https'], require_protocol: true }),
+        message: 'You must enter a valid URL (http/https)',
       },
     },
     owner: {
       type: Types.ObjectId,
-      ref: 'User',
+      ref: 'user', // 👈 Debe coincidir con tu modelo: mongoose.model('user', userSchema)
       required: true,
     },
-    // ✅ default en el path del array
     likes: {
-      type: [{ type: Types.ObjectId, ref: 'User' }],
+      type: [{ type: Types.ObjectId, ref: 'user' }],
       default: [],
     },
     createdAt: {
