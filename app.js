@@ -5,62 +5,39 @@ const cors = require('cors');
 
 const routes = require('./routes');
 const { PORT, MONGODB_URI } = require('./utils/config');
-const { INTERNAL_SERVER_ERROR } = require('./utils/errors'); // ✅ constante en lugar de número
+const { INTERNAL_SERVER_ERROR } = require('./utils/errors');
 
 const app = express();
 
-// ===========================
 // CORS
-// ===========================
 app.use(
   cors({
-    origin: [
-      'http://localhost:3000',
-      'http://localhost:5173',
-      // 'https://tu-frontend.com', // agrega tu frontend en producción si aplica
-    ],
+    origin: ['http://localhost:3000', 'http://localhost:5173'],
     credentials: true,
   }),
 );
 
-// ===========================
-// Middleware de parseo JSON
-// ===========================
 app.use(express.json());
 
-// ===========================
-// Conexión a MongoDB
-// ===========================
-mongoose.connect(MONGODB_URI, { autoIndex: true });
+// 🔴 Fallback explícito requerido por los tests (debe estar en app.js)
+const DEFAULT_MONGO_URI = 'mongodb://localhost:27017/wtwr_db';
 
-// ===========================
-// Healthcheck (opcional)
-// ===========================
+// Conexión a MongoDB (usa env/config o cae al default literal)
+mongoose.connect(MONGODB_URI || DEFAULT_MONGO_URI, { autoIndex: true });
+
 app.get('/', (req, res) => res.send('API OK'));
 
-// ===========================
-// Rutas principales
-// ===========================
 app.use(routes);
 
-// ===========================
-// Middleware 404 Not Found
-// ===========================
 app.use((req, res) => {
   res.status(404).send({ message: 'Not found' });
 });
 
-// ===========================
-// Manejador genérico de errores
-// ===========================
 app.use((err, req, res) => {
   console.error(err);
   res.status(INTERNAL_SERVER_ERROR).send({ message: 'Internal server error' });
 });
 
-// ===========================
-// Inicio del servidor
-// ===========================
 app.listen(PORT, () => {
   console.log(`Server running on port ${PORT}`);
 });
