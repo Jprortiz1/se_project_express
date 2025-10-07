@@ -1,12 +1,21 @@
+// controllers/clothingItems.js
 const mongoose = require('mongoose');
 const ClothingItem = require('../models/clothingItem');
-const { BAD_REQUEST, NOT_FOUND, FORBIDDEN, INTERNAL_SERVER_ERROR } = require('../utils/errors');
+const {
+  BAD_REQUEST,
+  NOT_FOUND,
+  FORBIDDEN,
+  INTERNAL_SERVER_ERROR,
+  CREATED,
+} = require('../utils/errors');
 
+// GET /items (público)
 module.exports.getItems = async (req, res) => {
   try {
     const items = await ClothingItem.find({});
     return res.send(items);
   } catch (err) {
+    // eslint-disable-next-line no-console
     console.error(err);
     return res
       .status(INTERNAL_SERVER_ERROR)
@@ -14,13 +23,16 @@ module.exports.getItems = async (req, res) => {
   }
 };
 
+// POST /items (protegido)
 module.exports.createItem = async (req, res) => {
   try {
     const { name, weather, imageUrl } = req.body;
     const owner = req.user && req.user._id;
+
     const item = await ClothingItem.create({ name, weather, imageUrl, owner });
-    return res.status(201).send(item);
+    return res.status(CREATED).send(item);
   } catch (err) {
+    // eslint-disable-next-line no-console
     console.error(err);
     if (err.name === 'ValidationError' || err.name === 'CastError') {
       return res.status(BAD_REQUEST).send({ message: 'Invalid data' });
@@ -31,6 +43,7 @@ module.exports.createItem = async (req, res) => {
   }
 };
 
+// DELETE /items/:itemId (protegido, SOLO dueño)
 module.exports.deleteItem = async (req, res) => {
   try {
     const { itemId } = req.params;
@@ -43,12 +56,15 @@ module.exports.deleteItem = async (req, res) => {
     const item = await ClothingItem.findById(itemId).orFail();
 
     if (item.owner.toString() !== userId) {
+      // 403 si no es el dueño
       return res.status(FORBIDDEN).send({ message: 'Forbidden: not the owner' });
     }
 
+    // elimina y devuelve el documento eliminado (contrato: devolver el item, no un envoltorio)
     await item.deleteOne();
-    return res.send({ message: 'Item deleted', item });
+    return res.send(item); // 👈 devolver el objeto directo
   } catch (err) {
+    // eslint-disable-next-line no-console
     console.error(err);
     if (err.name === 'DocumentNotFoundError') {
       return res.status(NOT_FOUND).send({ message: 'Item not found' });
@@ -62,6 +78,7 @@ module.exports.deleteItem = async (req, res) => {
   }
 };
 
+// PUT /items/:itemId/likes (protegido)
 module.exports.likeItem = async (req, res) => {
   const { itemId } = req.params;
   const userId = req.user && req.user._id;
@@ -79,6 +96,7 @@ module.exports.likeItem = async (req, res) => {
 
     return res.send(updated);
   } catch (err) {
+    // eslint-disable-next-line no-console
     console.error(err);
     if (err.name === 'DocumentNotFoundError') {
       return res.status(NOT_FOUND).send({ message: 'Item not found' });
@@ -92,6 +110,7 @@ module.exports.likeItem = async (req, res) => {
   }
 };
 
+// DELETE /items/:itemId/likes (protegido)
 module.exports.dislikeItem = async (req, res) => {
   const { itemId } = req.params;
   const userId = req.user && req.user._id;
@@ -109,6 +128,7 @@ module.exports.dislikeItem = async (req, res) => {
 
     return res.send(updated);
   } catch (err) {
+    // eslint-disable-next-line no-console
     console.error(err);
     if (err.name === 'DocumentNotFoundError') {
       return res.status(NOT_FOUND).send({ message: 'Item not found' });

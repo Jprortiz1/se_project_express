@@ -5,48 +5,62 @@ const cors = require('cors');
 
 const routes = require('./routes');
 const { PORT, MONGODB_URI } = require('./utils/config');
+const { INTERNAL_SERVER_ERROR } = require('./utils/errors'); // ✅ constante en lugar de número
 
 const app = express();
 
+// ===========================
 // CORS
+// ===========================
 app.use(
   cors({
     origin: [
       'http://localhost:3000',
       'http://localhost:5173',
-      // 'https://tu-frontend.com', // agrega tu frontend en prod si aplica
+      // 'https://tu-frontend.com', // agrega tu frontend en producción si aplica
     ],
     credentials: true,
   }),
 );
 
-// Parseo JSON
+// ===========================
+// Middleware de parseo JSON
+// ===========================
 app.use(express.json());
 
-// Conexión a Mongo
+// ===========================
+// Conexión a MongoDB
+// ===========================
 mongoose.connect(MONGODB_URI, { autoIndex: true });
 
-// (Opcional) Healthcheck sencillo
+// ===========================
+// Healthcheck (opcional)
+// ===========================
 app.get('/', (req, res) => res.send('API OK'));
 
-// Rutas
+// ===========================
+// Rutas principales
+// ===========================
 app.use(routes);
 
-// 404 para rutas no encontradas
+// ===========================
+// Middleware 404 Not Found
+// ===========================
 app.use((req, res) => {
   res.status(404).send({ message: 'Not found' });
 });
 
-// Manejador de errores genérico
-// eslint-disable-next-line no-unused-vars
-app.use((err, req, res, next) => {
-  // eslint-disable-next-line no-console
+// ===========================
+// Manejador genérico de errores
+// ===========================
+app.use((err, req, res) => {
   console.error(err);
-  res.status(500).send({ message: 'Internal server error' });
+  res.status(INTERNAL_SERVER_ERROR).send({ message: 'Internal server error' });
 });
 
+// ===========================
 // Inicio del servidor
+// ===========================
 app.listen(PORT, () => {
-  // eslint-disable-next-line no-console
   console.log(`Server running on port ${PORT}`);
 });
