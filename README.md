@@ -28,3 +28,7 @@ npm run dev   # hot reload
 npm start
 
 ```
+
+## Project Pitch Video
+
+Check out [this video](https://drive.google.com/file/d/1BcETBWhYlj0oL9fUKR22I7dnhWM22Tt5/view?usp=sharing), where I describe my project and the challenges I faced while building it.

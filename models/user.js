@@ -1,3 +1,4 @@
+// models/user.js
 const mongoose = require('mongoose');
 const validator = require('validator');
 const bcrypt = require('bcryptjs');
@@ -35,8 +36,8 @@ const userSchema = new mongoose.Schema(
     password: {
       type: String,
       required: true,
-      minlength: 8,
-      select: false, // 🔹 el hash no se incluye en consultas normales
+      // No minlength aquí: el hash siempre tiene longitud fija
+      select: false,
     },
   },
   { versionKey: false, timestamps: true },
@@ -47,7 +48,7 @@ const userSchema = new mongoose.Schema(
 // ==========================================
 userSchema.statics.findUserByCredentials = function findUserByCredentials(email, password) {
   return this.findOne({ email })
-    .select('+password') // 🔹 traemos el hash manualmente
+    .select('+password')
     .then((user) => {
       if (!user) {
         return Promise.reject(new Error('AUTH_FAILED'));

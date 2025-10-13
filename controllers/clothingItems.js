@@ -15,7 +15,6 @@ module.exports.getItems = async (req, res) => {
     const items = await ClothingItem.find({});
     return res.send(items);
   } catch (err) {
-    // eslint-disable-next-line no-console
     console.error(err);
     return res
       .status(INTERNAL_SERVER_ERROR)
@@ -32,9 +31,8 @@ module.exports.createItem = async (req, res) => {
     const item = await ClothingItem.create({ name, weather, imageUrl, owner });
     return res.status(CREATED).send(item);
   } catch (err) {
-    // eslint-disable-next-line no-console
     console.error(err);
-    if (err.name === 'ValidationError' || err.name === 'CastError') {
+    if (err.name === 'ValidationError') {
       return res.status(BAD_REQUEST).send({ message: 'Invalid data' });
     }
     return res
@@ -62,14 +60,13 @@ module.exports.deleteItem = async (req, res) => {
 
     // elimina y devuelve el documento eliminado (contrato: devolver el item, no un envoltorio)
     await item.deleteOne();
-    return res.send(item); // 👈 devolver el objeto directo
+    return res.send(item); // devolver el objeto directo
   } catch (err) {
-    // eslint-disable-next-line no-console
     console.error(err);
     if (err.name === 'DocumentNotFoundError') {
       return res.status(NOT_FOUND).send({ message: 'Item not found' });
     }
-    if (err.name === 'CastError' || err.name === 'ValidationError') {
+    if (err.name === 'CastError') {
       return res.status(BAD_REQUEST).send({ message: 'Invalid data' });
     }
     return res
@@ -96,7 +93,6 @@ module.exports.likeItem = async (req, res) => {
 
     return res.send(updated);
   } catch (err) {
-    // eslint-disable-next-line no-console
     console.error(err);
     if (err.name === 'DocumentNotFoundError') {
       return res.status(NOT_FOUND).send({ message: 'Item not found' });
@@ -128,7 +124,6 @@ module.exports.dislikeItem = async (req, res) => {
 
     return res.send(updated);
   } catch (err) {
-    // eslint-disable-next-line no-console
     console.error(err);
     if (err.name === 'DocumentNotFoundError') {
       return res.status(NOT_FOUND).send({ message: 'Item not found' });

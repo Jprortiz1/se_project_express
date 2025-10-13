@@ -5,7 +5,7 @@ const cors = require('cors');
 
 const routes = require('./routes');
 const { PORT, MONGODB_URI } = require('./utils/config');
-const { INTERNAL_SERVER_ERROR } = require('./utils/errors');
+const { INTERNAL_SERVER_ERROR, NOT_FOUND } = require('./utils/errors');
 
 const app = express();
 
@@ -27,29 +27,29 @@ app.use(express.json());
 // ===========================
 // Stub requerido por los tests del Sprint 12 (no afecta la auth del Sprint 13)
 // ===========================
-app.use((req, res, next) => {
-  req.user = { _id: '5d8b8592978f8bd833ca8133' };
-  next();
-});
+// app.use((req, res, next) => {
+//   req.user = { _id: '5d8b8592978f8bd833ca8133' };
+//   next();
+// });
 
 // ===========================
-// Conexión a MongoDB ✅
+// Conextion a MongoDB ✅
 // ===========================
 mongoose.connect(process.env.MONGODB_URI || MONGODB_URI || 'mongodb://localhost:27017/wtwr_db', {
   autoIndex: true,
 });
 
 // ===========================
-// Rutas
+// Routes
 // ===========================
 app.get('/', (req, res) => res.send('API OK'));
 app.use(routes);
 
 // ===========================
-// 404 y manejador de errores
+// 404 y  errors
 // ===========================
 app.use((req, res) => {
-  res.status(404).send({ message: 'Not found' });
+  res.status(NOT_FOUND).send({ message: 'Not found' });
 });
 
 app.use((err, req, res) => {
@@ -58,7 +58,7 @@ app.use((err, req, res) => {
 });
 
 // ===========================
-// Inicio del servidor
+// Start server
 // ===========================
 app.listen(PORT, () => {
   console.log(`Server running on port ${PORT}`);
