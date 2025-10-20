@@ -26,11 +26,13 @@ module.exports.createUser = (req, res, next) => {
       return res.status(CREATED).send(userObj);
     })
     .catch((err) => {
+      console.log(err);
       if (err.code === 11000) {
-        return res.status(CONFLICT).send({ message: 'Email already registered' });
+        return res.status(CONFLICT).send({ message: 'EMAIL_IN_USE' });
       }
       if (err.name === 'ValidationError') {
-        return res.status(BAD_REQUEST).send({ message: 'Invalid data' });
+        const messages = Object.values(err.errors).map((e) => e.message);
+        return res.status(BAD_REQUEST).send({ message: messages.join(', ') });
       }
       return next(err);
     });
@@ -52,8 +54,11 @@ module.exports.login = (req, res, next) => {
       return res.send({ token });
     })
     .catch((err) => {
-      if (err.message === 'AUTH_FAILED') {
-        return res.status(UNAUTHORIZED).send({ message: 'Invalid email or password' });
+      if (err.message === 'EMAIL_NOT_FOUND') {
+        return res.status(UNAUTHORIZED).send({ message: err.message });
+      }
+      if (err.message === 'WRONG_PASSWORD') {
+        return res.status(UNAUTHORIZED).send({ message: err.message });
       }
       return next(err);
     });
@@ -96,7 +101,8 @@ module.exports.updateCurrentUser = (req, res, next) => {
     })
     .catch((err) => {
       if (err.name === 'ValidationError') {
-        return res.status(BAD_REQUEST).send({ message: 'Invalid data' });
+        const messages = Object.values(err.errors).map((e) => e.message);
+        return res.status(BAD_REQUEST).send({ message: messages.join(', ') });
       }
       return next(err);
     });

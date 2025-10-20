@@ -18,7 +18,7 @@ const userSchema = new mongoose.Schema(
         validator(v) {
           return validator.isURL(v);
         },
-        message: 'Invalid URL format',
+        message: 'INVALID_AVATAR_URL',
       },
     },
     email: {
@@ -30,7 +30,7 @@ const userSchema = new mongoose.Schema(
         validator(v) {
           return validator.isEmail(v);
         },
-        message: 'Invalid email format',
+        message: 'INVALID_EMAIL_FORMAT',
       },
     },
     password: {
@@ -51,11 +51,11 @@ userSchema.statics.findUserByCredentials = function findUserByCredentials(email,
     .select('+password')
     .then((user) => {
       if (!user) {
-        return Promise.reject(new Error('AUTH_FAILED'));
+        return Promise.reject(new Error('EMAIL_NOT_FOUND'));
       }
       return bcrypt.compare(password, user.password).then((matched) => {
         if (!matched) {
-          return Promise.reject(new Error('AUTH_FAILED'));
+          return Promise.reject(new Error('WRONG_PASSWORD'));
         }
         return user;
       });
