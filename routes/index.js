@@ -5,10 +5,11 @@ const { createUser, login } = require('../controllers/users');
 const usersRouter = require('./users');
 const clothingItemsRouter = require('./clothingItems');
 const { getItems } = require('../controllers/clothingItems');
+const { validateSignin, validateSignup } = require('../middlewares/validation');
 
 // 🔓 RUTAS PÚBLICAS (van ANTES del auth)
-router.post('/signup', createUser);
-router.post('/signin', login);
+router.post('/signup', validateSignup, createUser);
+router.post('/signin', validateSignin, login);
 router.get('/items', getItems);
 
 // 🔒 TODO LO DEMÁS REQUIERE TOKEN
