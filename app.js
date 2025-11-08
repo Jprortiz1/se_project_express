@@ -1,8 +1,11 @@
+// app.js
 require('dotenv').config();
+
 const express = require('express');
 const mongoose = require('mongoose');
 const cors = require('cors');
-const { errors } = require('celebrate');
+const { errors: celebrateErrors } = require('celebrate');
+
 const routes = require('./routes');
 const { PORT, MONGODB_URI } = require('./utils/config');
 const { INTERNAL_SERVER_ERROR, NOT_FOUND } = require('./utils/errors');
@@ -10,9 +13,7 @@ const { requestLogger, errorLogger } = require('./middlewares/logger');
 
 const app = express();
 
-// ===========================
-// CORS
-// ===========================
+/* -------------------------------- CORS ---------------------------------- */
 app.use(
   cors({
     origin: ['http://localhost:3000', 'http://localhost:5173'],
@@ -20,69 +21,53 @@ app.use(
   }),
 );
 
-// ===========================
-// Middleware para parsear JSON
-// ===========================
+/* ---------------------------- Parseo de JSON ----------------------------- */
 app.use(express.json());
 
-// ===========================
-// Request logger
-// ===========================
+/* ------------------------- Logger de solicitudes ------------------------- */
 app.use(requestLogger);
 
-// ===========================
-// Stub requerido por los tests del Sprint 12 (no afecta la auth del Sprint 13)
-// ===========================
-// app.use((req, res, next) => {
-//   req.user = { _id: '5d8b8592978f8bd833ca8133' };
-//   next();
-// });
-
-// ===========================
-// Conextion a MongoDB ✅
-// ===========================
+/* ------------------------- Conexión a MongoDB ---------------------------- */
 mongoose.connect(process.env.MONGODB_URI || MONGODB_URI || 'mongodb://localhost:27017/wtwr_db', {
   autoIndex: true,
 });
 
-// ===========================
-// Routes
-// ===========================
-app.get('/', (req, res) => res.send('API OK'));
+/* ------------------------------- Healthcheck ----------------------------- */
+app.get('/', (_req, res) => res.send('API OK'));
 
+/* ------------------------------ Crash test ------------------------------- */
+/* Requerido por la revisión: antes de /signin y /signup */
 app.get('/crash-test', () => {
   setTimeout(() => {
     throw new Error('Server will crash now');
   }, 0);
 });
 
+/* -------------------------------- Rutas ---------------------------------- */
 app.use(routes);
 
-// ===========================
-// 404 y  errors
-// ===========================
-app.use((req, res) => {
+/* ------------------------------- 404 plano ------------------------------- */
+app.use((_req, res) => {
   res.status(NOT_FOUND).send({ message: 'Not found' });
 });
 
-// app.use((err, req, res) => {
-//   console.error(err);
-//   res.status(INTERNAL_SERVER_ERROR).send({ message: 'Internal server error' });
-// });
+/* -------------------------- Logger de errores ---------------------------- */
+app.use(errorLogger);
 
-app.use(errors());
+/* --------------------- Errores de celebrate/joi -------------------------- */
+app.use(celebrateErrors());
 
-app.use((err, req, res, next) => {
-  console.error(err);
+/* ----------------------- Manejador central de errores -------------------- */
+/* eslint-disable-next-line no-unused-vars */
+app.use((err, _req, res, _next) => {
   const { statusCode = INTERNAL_SERVER_ERROR, message } = err;
   res.status(statusCode).send({
     message: statusCode === INTERNAL_SERVER_ERROR ? 'Internal server error' : message,
   });
 });
 
-// ===========================
-// Start server
-// ===========================
+/* ------------------------------- Arranque -------------------------------- */
 app.listen(PORT, () => {
+  // eslint-disable-next-line no-console
   console.log(`Server running on port ${PORT}`);
 });
