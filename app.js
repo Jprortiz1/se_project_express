@@ -16,7 +16,7 @@ const app = express();
 /* -------------------------------- CORS ---------------------------------- */
 app.use(
   cors({
-    origin: ['http://localhost:3000', 'http://localhost:5173'],
+    origin: ['http://gcp-prueba.crabdance.com/', 'http://www.gcp-prueba.crabdance.com/'],
     credentials: true,
   }),
 );
