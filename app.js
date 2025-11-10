@@ -16,7 +16,7 @@ const app = express();
 /* -------------------------------- CORS ---------------------------------- */
 app.use(
   cors({
-    origin: ['http://gcp-prueba.crabdance.com', 'http://www.gcp-prueba.crabdance.com'],
+    origin: ['https://gcp-prueba.crabdance.com', 'https://www.gcp-prueba.crabdance.com'],
     credentials: true,
   }),
 );
