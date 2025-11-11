@@ -1,26 +1,25 @@
 // controllers/clothingItems.js
 const mongoose = require('mongoose');
 const ClothingItem = require('../models/clothingItem');
-const {
-  BAD_REQUEST,
-  NOT_FOUND,
-  FORBIDDEN,
-  INTERNAL_SERVER_ERROR,
-  CREATED,
-} = require('../utils/errors');
+// 👇 Deja de importar códigos numéricos; usa clases (recomendado)
+// const { BAD_REQUEST, NOT_FOUND, FORBIDDEN, INTERNAL_SERVER_ERROR, CREATED } = require('../utils/errors');
+const { AppError } = require('../utils/errors'); // si ya creaste clases
 
 // GET /items (público)
-module.exports.getItems = async (req, res) => {
+module.exports.getItems = async (req, res, next) => {
   try {
     const items = await ClothingItem.find({});
     return res.send(items);
   } catch (err) {
-    console.error(err);
-    return res
-      .status(INTERNAL_SERVER_ERROR)
-      .send({ message: 'An error has occurred on the server.' });
+    // ❌ No respondas aquí con res.status(...)
+//  console.error(err);
+//  return res.status(INTERNAL_SERVER_ERROR).send({ message: 'An error has occurred on the server.' });
+
+    // ✅ Delega al handler centralizado
+    return next(err instanceof Error ? err : new AppError('Unexpected error', 500));
   }
 };
+
 
 // POST /items (protegido)
 module.exports.createItem = async (req, res) => {

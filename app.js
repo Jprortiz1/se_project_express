@@ -8,7 +8,7 @@ const { errors: celebrateErrors } = require('celebrate');
 
 const routes = require('./routes');
 const { PORT, MONGODB_URI } = require('./utils/config');
-const { INTERNAL_SERVER_ERROR, NOT_FOUND } = require('./utils/errors');
+const { NotFoundError } = require('./utils/errors'); // ✅ usar clase, no constantes
 const { requestLogger, errorLogger } = require('./middlewares/logger');
 
 const app = express();
@@ -46,24 +46,24 @@ app.get('/crash-test', () => {
 /* -------------------------------- Rutas ---------------------------------- */
 app.use(routes);
 
-/* ------------------------------- 404 plano ------------------------------- */
-app.use((_req, res) => {
-  res.status(NOT_FOUND).send({ message: 'Not found' });
+/* ------------------------------- 404 → throw ----------------------------- */
+// ❌ No responder aquí. ✅ Lanzar excepción y que responda el handler central
+app.use((req, res, next) => {
+  next(new NotFoundError('Requested resource not found'));
 });
 
 /* -------------------------- Logger de errores ---------------------------- */
 app.use(errorLogger);
 
 /* --------------------- Errores de celebrate/joi -------------------------- */
-app.use(celebrateErrors());
+app.use(celebrateErrors()); // ✅ antes del manejador central
 
 /* ----------------------- Manejador central de errores -------------------- */
 /* eslint-disable-next-line no-unused-vars */
 app.use((err, _req, res, _next) => {
-  const { statusCode = INTERNAL_SERVER_ERROR, message } = err;
-  res.status(statusCode).send({
-    message: statusCode === INTERNAL_SERVER_ERROR ? 'Internal server error' : message,
-  });
+  const statusCode = err.statusCode || 500;
+  const message = statusCode === 500 ? 'Internal server error' : err.message;
+  res.status(statusCode).send({ message });
 });
 
 /* ------------------------------- Arranque -------------------------------- */

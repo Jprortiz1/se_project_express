@@ -9,33 +9,37 @@ const { CREATED, BAD_REQUEST, UNAUTHORIZED, NOT_FOUND, CONFLICT } = require('../
 // ===============================
 // POST /signup → Crear usuario
 // ===============================
-module.exports.createUser = (req, res, next) => {
-  const { name, avatar, email, password } = req.body;
+module.exports.createUser = async (req, res, next) => {
+  try {
+    const { name, avatar, email, password } = req.body;
 
-  if (!password) {
-    return res.status(BAD_REQUEST).send({ message: 'Password is required' });
+    if (!password) {
+      // ❌ No respondas aquí con res.status(...)
+      // ✅ Lanza error para que lo maneje el middleware central
+      throw new BadRequestError('Password is required');
+    }
+
+    const hash = await bcrypt.hash(password, 10);
+    const user = await User.create({ name, avatar, email, password: hash });
+
+    // Evitar devolver el hash
+    const userObj = user.toObject();
+    delete userObj.password;
+
+    return res.status(CREATED || 201).send(userObj);
+  } catch (err) {
+    // Duplicado de índice único (email)
+    if (err && err.code === 11000) {
+      return next(new ConflictError('EMAIL_IN_USE'));
+    }
+    // Errores de validación de mongoose
+    if (err && err.name === 'ValidationError') {
+      const messages = Object.values(err.errors).map((e) => e.message);
+      return next(new BadRequestError(messages.join(', ')));
+    }
+    // Delegar cualquier otro error
+    return next(err);
   }
-
-  return bcrypt
-    .hash(password, 10)
-    .then((hash) => User.create({ name, avatar, email, password: hash }))
-    .then((user) => {
-      // Garantizamos que no se devuelva el hash
-      const userObj = user.toObject();
-      delete userObj.password;
-      return res.status(CREATED).send(userObj);
-    })
-    .catch((err) => {
-      console.log(err);
-      if (err.code === 11000) {
-        return res.status(CONFLICT).send({ message: 'EMAIL_IN_USE' });
-      }
-      if (err.name === 'ValidationError') {
-        const messages = Object.values(err.errors).map((e) => e.message);
-        return res.status(BAD_REQUEST).send({ message: messages.join(', ') });
-      }
-      return next(err);
-    });
 };
 
 // ===============================

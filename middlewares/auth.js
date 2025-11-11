@@ -1,22 +1,22 @@
 // middlewares/auth.js
 const jwt = require('jsonwebtoken');
 const { JWT_SECRET } = require('../utils/config');
-const { UNAUTHORIZED } = require('../utils/errors'); // 👈 Importamos la constante
+const { UnauthorizedError } = require('../utils/errors'); // ✅ importa la clase
 
 module.exports = (req, res, next) => {
-  const { authorization } = req.headers;
+  const { authorization = '' } = req.headers;
 
-  if (!authorization || !authorization.startsWith('Bearer ')) {
-    return res.status(UNAUTHORIZED).send({ message: 'Authorization required' });
+  if (!authorization.startsWith('Bearer ')) {
+    return next(new UnauthorizedError('Authorization required'));
   }
 
-  const token = authorization.replace('Bearer ', '');
+  const token = authorization.slice(7); // remueve "Bearer "
 
   try {
     const payload = jwt.verify(token, JWT_SECRET);
     req.user = payload; // { _id: ... }
     return next();
-  } catch (e) {
-    return res.status(UNAUTHORIZED).send({ message: 'Invalid or expired token' });
+  } catch (err) {
+    return next(new UnauthorizedError('Invalid or expired token'));
   }
 };

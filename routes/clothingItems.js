@@ -1,14 +1,28 @@
 // routes/clothingitems.js
 const router = require('express').Router();
-const { createItem, deleteItem, likeItem, dislikeItem } = require('../controllers/clothingItems');
-// routes/index.js con prefijo /items
-router.post('/', createItem);
-router.delete('/:itemId', deleteItem);
+const {
+  createItem,
+  deleteItem,
+  likeItem,
+  dislikeItem,
+} = require('../controllers/clothingItems');
 
-// Likes
-// LIKE   → PUT   /items/:itemId/likes
-// UNLIKE → DELETE /items/:itemId/likes
-router.put('/:itemId/likes', likeItem);
-router.delete('/:itemId/likes', dislikeItem);
+// ⬅️ importa validaciones desde tu middlewares/validation.js
+const {
+  validateCreateItem,
+  validateItemId,
+} = require('../middlewares/validation');
+
+// POST /items  (crear prenda)
+router.post('/', validateCreateItem, createItem);
+
+// DELETE /items/:itemId  (borrar prenda)
+router.delete('/:itemId', validateItemId, deleteItem);
+
+// PUT /items/:itemId/likes  (like)
+router.put('/:itemId/likes', validateItemId, likeItem);
+
+// DELETE /items/:itemId/likes  (dislike)
+router.delete('/:itemId/likes', validateItemId, dislikeItem);
 
 module.exports = router;
