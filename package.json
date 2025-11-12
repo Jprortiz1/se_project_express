@@ -1,13 +1,13 @@
 {
   "name": "se_project_express",
   "version": "1.0.0",
-  "description": "The back-end project is focused on creating a server for the WTWR application. You’ll gain a deeper understanding of how to work with databases, set up security and testing, and deploy web applications on a remote machine. The eventual goal is to create a server with an API and user authorization. ## Running the Project `npm run start` — to launch the server",
-  "main": "index.js",
+  "description": "The back-end project is focused on creating a server for the WTWR application. You’ll gain a deeper understanding of how to work with databases, set up security and testing, and deploy web applications on a remote machine. The eventual goal is to create a server with an API and user authorization.",
+  "main": "server.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1",
+    "start": "node server.js",
+    "start:dev": "nodemon server.js",
     "lint": "npx eslint .",
-    "start": "node app.js",
-    "dev": "nodemon app.js"
+    "test": "echo \"No local tests configured\" && exit 0"
   },
   "repository": {
     "type": "git",
@@ -29,8 +29,6 @@
     "express": "^4.21.2",
     "express-winston": "^4.2.0",
     "helmet": "^7.2.0",
-    "http-status-codes": "^2.3.0",
-    "joi": "^17.13.3",
     "jsonwebtoken": "^9.0.2",
     "mongodb": "^6.20.0",
     "mongoose": "^8.18.2",
