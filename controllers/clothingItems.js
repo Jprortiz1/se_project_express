@@ -1,24 +1,18 @@
 // controllers/clothingItems.js
 const mongoose = require('mongoose');
 const ClothingItem = require('../models/clothingItem');
+const {  BadRequestError, NotFoundError, ForbiddenError  } = require('../utils/errors');
 
-// Asegúrate de exportar estas clases desde ../utils/errors/index.js
-const {
-  AppError,
-  BadRequestError,
-  NotFoundError,
-  ForbiddenError,
-} = require('../utils/errors');
-
-// ========== GET /items (público)
+// GET /items (público)
 module.exports.getItems = async (req, res, next) => {
   try {
-    const items = await ClothingItem.find({});
+    const items = await ClothingItem.find({}).lean();
     return res.send(items);
   } catch (err) {
-    return next(err instanceof Error ? err : new AppError('Unexpected error', 500));
+    return next(err); // el handler central leerá err.statusCode si existe
   }
 };
+
 
 // ========== POST /items (protegido)
 module.exports.createItem = async (req, res, next) => {

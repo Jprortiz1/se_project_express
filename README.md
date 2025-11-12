@@ -32,7 +32,7 @@ npm start
 
 ## Project Pitch Video
  
- Check out [this video](https://drive.google.com/file/d/1G2ZoxcIp02c_e5MgKuHcczOFfSMh9W9s/view?usp=drive_link), where I describe my 
+ Check out [this video](https://drive.google.com/file/d/1G2ZoxcIp02c_e5MgKuHcczOFfSMh9W9s/view?usp=sharing), where I describe my 
  project and some challenges I faced while building it.
 
  Frontend Project link 
