@@ -54,11 +54,13 @@ app.use(errorLogger);
 app.use(celebrateErrors());
 
 /* ----------------------- Manejador central de errores -------------------- */
+// eslint-disable-next-line no-unused-vars
 app.use((err, _req, res, _next) => {
   const statusCode = err.statusCode || 500;
   const message = statusCode === 500 ? 'Internal server error' : err.message;
   res.status(statusCode).send({ message });
 });
+
 
 /* -------------------- EXPORTA LA APP (no levantar aquí) ------------------ */
 module.exports = app;
